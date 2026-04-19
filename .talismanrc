@@ -1,6 +1,6 @@
 fileignoreconfig:
-- filename: src/modules/students/StudentForm.jsx
-  checksum: 22365350e437ee0d1fc18e0ce472a9f326daae6f62af7e3f42a2da5d56c9a14a
-- filename: src/components/Sidebar.jsx
-  checksum: f85b393984f4569884bdc16888195f7dde204d1073ffaa9750cc37057e247a44
+- filename: src/modules/students/StudentDetailView.jsx
+  checksum: 6ff96db5711c1f75ffdc7e1e1fd1c617b4b3b08433b3502f4e5ced38d2754c91
+- filename: src/modules/students/StudentsPage.jsx
+  checksum: 533607adef985d85f4f6b9215509f936c4dbba7da9424661302a27b499ad7714
 version: ""
