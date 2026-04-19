@@ -53,7 +53,7 @@ router.post('/', upload.single('photo'), (req, res) => {
     VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
   `);
   const result = stmt.run(
-    d.full_name, d.dob, d.gender, d.class, d.section, d.roll_no,
+    d.full_name, d.dob, d.gender, d.class,d.monthly_fees, d.section, d.roll_no,
     d.address, d.guardian_name, d.guardian_rel,
     d.contact_primary, d.contact_secondary, photo_url
   );

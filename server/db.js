@@ -28,6 +28,7 @@ db.exec(`
     dob         TEXT NOT NULL,
     gender      TEXT NOT NULL,
     class       TEXT NOT NULL,
+    monthly_fees REAL,
     section     TEXT,
     roll_no     TEXT,
     address     TEXT,
@@ -67,6 +68,7 @@ db.exec(`
     amount      REAL NOT NULL,
     created_at  TEXT DEFAULT (datetime('now'))
   );
+  
 
   CREATE INDEX IF NOT EXISTS idx_students_class ON students(class);
   CREATE INDEX IF NOT EXISTS idx_students_name  ON students(full_name);
