@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useExpenseStore } from '../../store/expenseStore.js';
 
 const CATEGORIES = ['Salary', 'Maintenance', 'Utilities', 'Events', 'Supplies', 'Other'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const YEARS = ['2024', '2025', '2026', '2027', '2028'];
 
-// FIX: Extracted FormField to fix typing focus bug
 const FormField = ({ label, k, type = 'text', required, opts, value, onChange }) => (
   <div>
     <label className="block text-xs font-medium text-gray-600 mb-1">
@@ -22,9 +23,14 @@ const FormField = ({ label, k, type = 'text', required, opts, value, onChange })
 
 export default function ExpenseForm({ initial, onClose }) {
   const { add, update } = useExpenseStore();
+  
+  // Default to current month and year
+  const currentMonth = new Date().toLocaleString('default', { month: 'long' });
+  const currentYear = new Date().getFullYear().toString();
+
   const [form, setForm] = useState(initial || {
-    month: new Date().toISOString().slice(0, 7), // YYYY-MM
-    year: new Date().getFullYear(),
+    month: currentMonth,
+    year: currentYear,
     category: '', 
     description: '', 
     amount: ''
@@ -35,13 +41,12 @@ export default function ExpenseForm({ initial, onClose }) {
   const handleUpdate = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
   const submit = async () => {
-    if (!form.month || !form.category || !form.amount) {
-      setError('Please fill required fields (Month, Category, Amount).'); 
+    if (!form.month || !form.year || !form.category || !form.amount) {
+      setError('Please fill required fields (Month, Year, Category, Amount).'); 
       return;
     }
     setSaving(true); setError('');
     try {
-      // Assuming store accepts plain object
       initial ? await update(initial.id, form) : await add(form);
       onClose();
     } catch (e) { setError(e.message || 'Something went wrong'); } 
@@ -51,16 +56,20 @@ export default function ExpenseForm({ initial, onClose }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
-        <FormField label="Month" k="month" type="month" value={form.month} onChange={handleUpdate} required />
-        <FormField label="Amount (₹)" k="amount" type="number" value={form.amount} onChange={handleUpdate} required />
+        <FormField label="Month" k="month" value={form.month} onChange={handleUpdate} required opts={MONTHS} />
+        <FormField label="Year" k="year" value={form.year} onChange={handleUpdate} required opts={YEARS} />
+        
         <div className="col-span-2">
           <FormField label="Category" k="category" value={form.category} onChange={handleUpdate} required opts={CATEGORIES} />
         </div>
+        
+        <FormField label="Amount (₹)" k="amount" type="number" value={form.amount} onChange={handleUpdate} required />
+        
         <div className="col-span-2">
           <FormField label="Description" k="description" value={form.description} onChange={handleUpdate} />
         </div>
       </div>
-      {error && <div className="p-2 bg-red-50 text-[11px] text-red-600">{error}</div>}
+      {error && <div className="p-2 bg-red-50 text-[11px] text-red-600 rounded">{error}</div>}
       <div className="flex justify-end gap-3 pt-4 border-t">
         <button onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
         <button onClick={submit} disabled={saving} className="px-6 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">

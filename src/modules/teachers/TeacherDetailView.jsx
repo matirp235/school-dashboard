@@ -1,15 +1,32 @@
 import React from 'react';
 
 export default function TeacherDetailView({ teacher, onClose }) {
+  
+  // Construct full image URL (Assuming backend runs on port 5000 in dev)
+  const getImageUrl = (path) => {
+    if (!path) return null;
+    return path.startsWith('/') ? `http://localhost:5000${path}` : path;
+  };
+
   return (
     <div className="flex flex-col gap-6">
       
-      {/* SECTION 1: Fixed Profile Details */}
+      {/* SECTION 1: Fixed Profile Details & Photo */}
       <section className="bg-amber-50 p-6 rounded-xl border border-amber-100 flex flex-col md:flex-row gap-6 items-center md:items-start">
+        
+        {/* Teacher Photo Thumbnail */}
         <div className="flex-shrink-0">
-          <div className="w-28 h-28 bg-amber-200 text-amber-700 flex items-center justify-center rounded-full text-4xl font-bold border-4 border-white shadow-md">
-            {teacher.full_name.charAt(0).toUpperCase()}
-          </div>
+          {teacher.photo_url ? (
+            <img 
+              src={getImageUrl(teacher.photo_url)} 
+              alt={teacher.full_name} 
+              className="w-28 h-28 object-cover rounded-full border-4 border-white shadow-md"
+            />
+          ) : (
+            <div className="w-28 h-28 bg-amber-200 text-amber-700 flex items-center justify-center rounded-full text-4xl font-bold border-4 border-white shadow-md">
+              {teacher.full_name.charAt(0).toUpperCase()}
+            </div>
+          )}
         </div>
 
         <div className="flex-1 w-full">

@@ -3,24 +3,19 @@ import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 
-// Recreate __dirname for ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Setup directory for uploads
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Initialize Database
 const db = new Database(path.join(__dirname, '..', 'school.db'));
 
-// Enable WAL mode — better performance for concurrent reads
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
-// Schema initialization
 db.exec(`
   CREATE TABLE IF NOT EXISTS students (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -66,6 +61,7 @@ db.exec(`
     contact_secondary TEXT,
     address      TEXT,
     joining_date TEXT,
+    photo_url    TEXT,
     created_at   TEXT DEFAULT (datetime('now')),
     updated_at   TEXT DEFAULT (datetime('now'))
   );
@@ -87,16 +83,21 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_fees_student ON student_fees(student_id);
 `);
 
-// Safe Migration: Add security_deposit if it doesn't exist in older databases
+// Safe Migration for Students
 try {
   const tableInfo = db.pragma("table_info(students)");
-  const hasDeposit = tableInfo.some(col => col.name === 'security_deposit');
-  if (!hasDeposit) {
+  if (!tableInfo.some(col => col.name === 'security_deposit')) {
     db.exec('ALTER TABLE students ADD COLUMN security_deposit REAL DEFAULT 0');
-    console.log('Migration: Added security_deposit to students table');
   }
-} catch (error) {
-  console.error("Migration failed:", error);
-}
+} catch (error) { console.error("Student Migration failed:", error); }
+
+// Safe Migration for Teachers Photo
+try {
+  const teacherTableInfo = db.pragma("table_info(teachers)");
+  if (!teacherTableInfo.some(col => col.name === 'photo_url')) {
+    db.exec('ALTER TABLE teachers ADD COLUMN photo_url TEXT');
+    console.log('Migration: Added photo_url to teachers table');
+  }
+} catch (error) { console.error("Teacher Migration failed:", error); }
 
 export default db;
