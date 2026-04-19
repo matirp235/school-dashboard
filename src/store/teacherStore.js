@@ -1,30 +1,73 @@
 import { create } from 'zustand';
-import { teacherService } from '../services/teacherService';
 
 export const useTeacherStore = create((set) => ({
   teachers: [],
-  loading: false,
-  error: null,
 
-  fetch: async (params) => {
-    set({ loading: true, error: null });
+  // 1. Fetch all teachers (with optional search and filter)
+  fetchAll: async (q = '', department = '') => {
     try {
-      const data = await teacherService.getAll(params);
-      set({ teachers: data, loading: false });
-    } catch (e) {
-      set({ error: e.message, loading: false });
+      const query = new URLSearchParams();
+      if (q) query.append('q', q);
+      if (department) query.append('department', department);
+
+      const res = await fetch(`/api/teachers?${query.toString()}`);
+      if (!res.ok) throw new Error('Failed to fetch teachers');
+      
+      const data = await res.json();
+      set({ teachers: data });
+    } catch (error) {
+      console.error('Error fetching teachers:', error);
     }
   },
-  add: async (data) => {
-    const t = await teacherService.create(data);
-    set(st => ({ teachers: [t, ...st.teachers] }));
+
+  // 2. Add a new teacher
+  add: async (teacherData) => {
+    const res = await fetch('/api/teachers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(teacherData),
+    });
+    
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Failed to add teacher');
+    }
+    
+    // Auto-refresh the table by adding the new teacher to the state
+    const newTeacher = await res.json();
+    set((state) => ({ teachers: [...state.teachers, newTeacher] }));
   },
-  update: async (id, data) => {
-    const t = await teacherService.update(id, data);
-    set(st => ({ teachers: st.teachers.map(x => x.id === id ? t : x) }));
+
+  // 3. Update an existing teacher
+  update: async (id, teacherData) => {
+    const res = await fetch(`/api/teachers/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(teacherData),
+    });
+    
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Failed to update teacher');
+    }
+    
+    // Auto-refresh the table by replacing the old record
+    const updatedTeacher = await res.json();
+    set((state) => ({
+      teachers: state.teachers.map((t) => (t.id === id ? updatedTeacher : t)),
+    }));
   },
-  remove: async (id) => {
-    await teacherService.delete(id);
-    set(st => ({ teachers: st.teachers.filter(x => x.id !== id) }));
-  },
+
+  // 4. Delete a teacher
+  deleteTeacher: async (id) => {
+    const res = await fetch(`/api/teachers/${id}`, {
+      method: 'DELETE',
+    });
+    
+    if (!res.ok) throw new Error('Failed to delete teacher');
+    
+    set((state) => ({
+      teachers: state.teachers.filter((t) => t.id !== id),
+    }));
+  }
 }));
