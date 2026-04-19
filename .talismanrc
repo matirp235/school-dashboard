@@ -1,10 +1,4 @@
 fileignoreconfig:
-- filename: src/modules/expenses/ExpenseForm.jsx
-  checksum: 53bf00b1f073dfd7752e31e5912bf21d2989e3ef66a638039cc56b93ab49dd4b
-- filename: src/modules/teachers/TeacherDetailView.jsx
-  checksum: ac65fbd1c77adfd54ffb91b34c27f22d2e72743bbe4990f816e76090f3713bde
-- filename: src/modules/teachers/TeacherForm.jsx
-  checksum: e2b8a5328c115cc783e7faa19c53aa416f1042d529232d0864999c333d3edef2
-- filename: src/modules/teachers/TeachersPage.jsx
-  checksum: db777a42e7be9a3b4e9d49f00070af717dfa986b15d96b9dd2a0277ec189293a
+- filename: src/modules/expenses/ExpensesPage.jsx
+  checksum: 37d47c290cf4cf6c918e3530e9bd4e2e43a6856446441b8409e2c031e507f4ef
 version: ""

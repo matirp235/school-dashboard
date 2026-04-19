@@ -1,61 +1,113 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { StatCard } from '../../components/StatCard';
-import axios from 'axios';
-
-const shortcuts = [
-  { to: '/students', icon: '🎓', label: 'Students',  desc: 'Manage student profiles',  color: 'bg-blue-50  hover:bg-blue-100  text-blue-700'  },
-  { to: '/teachers', icon: '👤', label: 'Teachers',  desc: 'Manage teacher profiles',  color: 'bg-purple-50 hover:bg-purple-100 text-purple-700' },
-  { to: '/expenses', icon: '₹',  label: 'Expenses',  desc: 'Track monthly expenses',   color: 'bg-amber-50 hover:bg-amber-100  text-amber-700'  },
-];
+import { useStudentStore } from '../../store/studentStore.js';
+import { useTeacherStore } from '../../store/teacherStore.js';
+import { useExpenseStore } from '../../store/expenseStore.js';
 
 export default function HomePage() {
-  const nav = useNavigate();
-  const [stats, setStats] = useState({ students: 0, teachers: 0, expenses: '—' });
-  const today = new Date();
+  // 1. Connect to all your stores
+  const { students, fetchAll: fetchStudents } = useStudentStore();
+  const { teachers, fetchAll: fetchTeachers } = useTeacherStore();
+  const { summary, fetchSummary } = useExpenseStore();
+
+  // 2. Dynamic Greeting Logic
+  const [greeting, setGreeting] = useState('');
+  const [currentDate, setCurrentDate] = useState('');
 
   useEffect(() => {
-    Promise.all([
-      axios.get('/api/students').then(r => r.data.length),
-      axios.get('/api/teachers').then(r => r.data.length),
-      axios.get('/api/expenses/summary', {
-        params: {
-          month: today.toLocaleString('default', { month: 'long' }),
-          year: today.getFullYear()
-        }
-      }).then(r => `₹${r.data.grand_total?.toLocaleString('en-IN') || 0}`),
-    ]).then(([students, teachers, expenses]) => setStats({ students, teachers, expenses }))
-      .catch(() => {});
+    const updateTime = () => {
+      const now = new Date();
+      const hour = now.getHours();
+      
+      if (hour < 12) setGreeting('Good Morning');
+      else if (hour < 18) setGreeting('Good Afternoon');
+      else setGreeting('Good Evening');
+
+      setCurrentDate(now.toLocaleDateString('en-IN', { 
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+      }));
+    };
+    
+    updateTime();
   }, []);
 
+  // 3. Fetch all live data on mount
+  useEffect(() => {
+    const month = new Date().toLocaleString('default', { month: 'long' });
+    const year = new Date().getFullYear().toString();
+
+    if (fetchStudents) fetchStudents();
+    if (fetchTeachers) fetchTeachers();
+    if (fetchSummary) fetchSummary(month, year);
+  }, [fetchStudents, fetchTeachers, fetchSummary]);
+
   return (
-    <div className="p-8 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-800">Good morning 👋</h1>
-        <p className="text-gray-500 text-sm mt-1">
-          {today.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-        </p>
+    <div className="p-6 space-y-6">
+      
+      {/* HEADER: Dynamic Greeting & Date */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800 tracking-tight">
+            {greeting}, Admin! 👋
+          </h1>
+          <p className="text-gray-500 mt-1 font-medium">{currentDate}</p>
+        </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-10">
-        <StatCard label="Total Students" value={stats.students} icon="🎓" color="blue" />
-        <StatCard label="Total Teachers"  value={stats.teachers} icon="👤" color="purple" />
-        <StatCard label="This Month's Expenses" value={stats.expenses} icon="₹" color="amber" />
-      </div>
-
-      {/* Quick access */}
-      <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">Quick Access</h2>
-      <div className="grid grid-cols-3 gap-4">
-        {shortcuts.map(({ to, icon, label, desc, color }) => (
-          <button key={to} onClick={() => nav(to)}
-            className={`${color} rounded-xl p-6 text-left transition-colors`}>
-            <span className="text-3xl">{icon}</span>
-            <p className="font-semibold mt-3">{label}</p>
-            <p className="text-xs mt-1 opacity-70">{desc}</p>
+      {/* AD BANNER SECTION */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl shadow-md overflow-hidden relative">
+        {/* Decorative background circle */}
+        <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-white opacity-10"></div>
+        <div className="p-6 md:p-8 flex flex-col md:flex-row items-center justify-between relative z-10">
+          <div className="text-white mb-4 md:mb-0">
+            <span className="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-bold uppercase tracking-wider mb-3 shadow-sm">
+              Announcement
+            </span>
+            <h2 className="text-2xl font-bold mb-1">Admissions Open for 2026-2027! 🎓</h2>
+            <p className="text-blue-100">Offer early-bird discounts on security deposits until the end of the month.</p>
+          </div>
+          <button className="whitespace-nowrap px-6 py-3 bg-white text-blue-700 font-bold rounded-lg shadow-lg hover:bg-gray-50 hover:scale-105 transition-transform">
+            Update Banner
           </button>
-        ))}
+        </div>
+      </div>
+
+      {/* LIVE METRICS DASHBOARD */}
+      <h2 className="text-xl font-bold text-gray-800 mt-8 mb-2">School Overview</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        {/* Metric 1: Total Students */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+          <div className="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-2xl">
+            👨‍🎓
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Total Students</p>
+            <p className="text-3xl font-bold text-gray-800">{students?.length || 0}</p>
+          </div>
+        </div>
+
+        {/* Metric 2: Total Teachers */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+          <div className="w-14 h-14 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-2xl">
+            👨‍🏫
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Active Staff</p>
+            <p className="text-3xl font-bold text-gray-800">{teachers?.length || 0}</p>
+          </div>
+        </div>
+
+        {/* Metric 3: Current Month Expenses */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+          <div className="w-14 h-14 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-2xl">
+            📉
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">This Month's Expenses</p>
+            <p className="text-3xl font-bold text-gray-800">₹{summary?.grand_total || 0}</p>
+          </div>
+        </div>
+
       </div>
     </div>
   );
