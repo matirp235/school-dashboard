@@ -1,44 +1,45 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink } from "react-router-dom";
 
-const links = [
-  { to: '/home',     icon: '⊞', label: 'Home' },
-  { to: '/students', icon: '🎓', label: 'Students' },
-  { to: '/teachers', icon: '👤', label: 'Teachers' },
-  { to: '/expenses', icon: '₹', label: 'Expenses' },
+const menuItems = [
+  { name: 'Dashboard', path: '/', icon: '📊' },
+  { name: 'Students', path: '/students', icon: '🎓' },
+  { name: 'Teachers', path: '/teachers', icon: '👨‍🏫' },
+  { name: 'Expenses', path: '/expenses', icon: '💸' },
 ];
 
 export default function Sidebar() {
   return (
-    <aside className="w-56 bg-white border-r border-gray-100 flex flex-col h-full no-print">
-      {/* Logo / brand */}
-      <div className="px-6 py-6 border-b border-gray-100">
-        <h1 className="text-base font-semibold text-gray-800">School Dashboard</h1>
-        <p className="text-xs text-gray-400 mt-0.5">Institution Management</p>
+    <aside className="w-64 bg-slate-900 text-white flex flex-col shadow-xl">
+      <div className="p-6">
+        <h1 className="text-xl font-bold tracking-tight text-blue-400">
+          School Admin
+        </h1>
+        <p className="text-xs text-slate-400 mt-1">Management Portal</p>
       </div>
 
-      {/* Nav links */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
-        {links.map(({ to, icon, label }) => (
+      <nav className="flex-1 px-4 space-y-2">
+        {menuItems.map((item) => (
           <NavLink
-            key={to}
-            to={to}
+            key={item.path}
+            to={item.path}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors
-               ${isActive
-                 ? 'bg-blue-50 text-blue-600 font-medium'
-                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
-               }`
+              `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                isActive 
+                  ? 'bg-blue-600 text-white' 
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`
             }
           >
-            <span className="text-base">{icon}</span>
-            {label}
+            <span>{item.icon}</span>
+            <span className="font-medium">{item.name}</span>
           </NavLink>
         ))}
       </nav>
 
-      {/* Footer */}
-      <div className="px-6 py-4 border-t border-gray-100">
-        <p className="text-xs text-gray-400">v1.0.0 · Local</p>
+      <div className="p-4 border-t border-slate-800">
+        <div className="bg-slate-800 rounded-lg p-3 text-center text-xs text-slate-400">
+          v1.0.0 Stable
+        </div>
       </div>
     </aside>
   );

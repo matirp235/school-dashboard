@@ -13,3 +13,6 @@ dist/
 # Environment variables
 .env
 .DS_Store
+
+# uploads
+server/uploads/

@@ -1,22 +1,6 @@
 fileignoreconfig:
-- filename: package-lock.json
-  checksum: b54c723c7d9e2870b0409f4ceef395e4f23f131e1803c064c168c8b9dec1c893
-- filename: src/modules/teachers/TeachersPage.jsx
-  checksum: 10c98a442829c0a2529e92a905d77155ef54940a9022cd4f3709d13c443a9f7a
-- filename: src/modules/teachers/TeacherForm.jsx
-  checksum: 79f356d5a7076652f09e12a373d0c7751ea3d0b931eefab21104c58d01500c45
-- filename: src/components/Table.jsx
-  checksum: 0221db6b9a6c32ac15f14c1b70daf9c514d427193bdc96d39ae2b755f9dae109
-- filename: src/modules/students/StudentsPage.jsx
-  checksum: e97f50ff432f8b4a38fe377eddbf38ebef57fd5f140c2ed00f4b2da75cfe92d6
-- filename: src/modules/students/StudentPrintView.jsx
-  checksum: f0aaa91fc0174df95cf9523cb69fa2521c4da3b974c142cc1627a5c6fb4984de
-- filename: src/modules/home/HomePage.jsx
-  checksum: bb2651c24679bd50c27d9caf9e51965d186fb476b812c24437e1ce47beab422d
-- filename: src/modules/expenses/ExpenseForm.jsx
-  checksum: 68a1f112b034dc05768881cbc3a299c7707e8e1fa59703165f037c5eb8cd5b6e
-- filename: src/modules/expenses/ExpensesPage.jsx
-  checksum: dc2a4027771a44ad1bf69d2dcc000da5182a126bd6ab507d376d95665f02e4f8
 - filename: src/modules/students/StudentForm.jsx
-  checksum: 42f3f41418d3ecd2a4fb98d2918e289ad0e06e41f3e4507f3e084b9576956f44
+  checksum: 22365350e437ee0d1fc18e0ce472a9f326daae6f62af7e3f42a2da5d56c9a14a
+- filename: src/components/Sidebar.jsx
+  checksum: f85b393984f4569884bdc16888195f7dde204d1073ffaa9750cc37057e247a44
 version: ""
