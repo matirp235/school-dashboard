@@ -1,30 +1,53 @@
 import { create } from 'zustand';
-import { studentService } from '../services/studentService';
 
 export const useStudentStore = create((set) => ({
   students: [],
-  loading: false,
-  error: null,
 
-  fetch: async (params) => {
-    set({ loading: true, error: null });
+  // 1. Fetch all students from the database
+  fetchAll: async () => {
     try {
-      const data = await studentService.getAll(params);
-      set({ students: data, loading: false });
-    } catch (e) {
-      set({ error: e.message, loading: false });
+      const res = await fetch('/api/students');
+      if (!res.ok) throw new Error('Failed to fetch students');
+      const data = await res.json();
+      set({ students: data });
+    } catch (error) {
+      console.error('Error fetching students:', error);
     }
   },
+
+  // 2. Add a new student (Uses FormData for the photo upload)
   add: async (formData) => {
-    const s = await studentService.create(formData);
-    set(st => ({ students: [s, ...st.students] }));
+    const res = await fetch('/api/students', {
+      method: 'POST',
+      body: formData, // Do NOT set Content-Type header here; browser does it for FormData
+    });
+    
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Failed to add student');
+    }
+    
+    // Auto-refresh the table by adding the new student to the state
+    const newStudent = await res.json();
+    set((state) => ({ students: [...state.students, newStudent] }));
   },
+
+  // 3. Update an existing student
   update: async (id, formData) => {
-    const s = await studentService.update(id, formData);
-    set(st => ({ students: st.students.map(x => x.id === id ? s : x) }));
-  },
-  remove: async (id) => {
-    await studentService.delete(id);
-    set(st => ({ students: st.students.filter(x => x.id !== id) }));
+    const res = await fetch(`/api/students/${id}`, {
+      method: 'PUT',
+      body: formData,
+    });
+    
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Failed to update student');
+    }
+    
+    // Auto-refresh the table by replacing the old record
+    const updatedStudent = await res.json();
+    set((state) => ({
+      students: state.students.map((s) => (s.id === id ? updatedStudent : s)),
+    }));
   },
 }));
