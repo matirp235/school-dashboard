@@ -12,6 +12,7 @@ const __dirname = path.dirname(__filename);
 import studentRoutes from './routes/students.js';
 import teacherRoutes from './routes/teachers.js';
 import expenseRoutes from './routes/expenses.js';
+import systemRoutes from './routes/system.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -26,6 +27,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/students', studentRoutes);
 app.use('/api/teachers', teacherRoutes);
 app.use('/api/expenses', expenseRoutes);
+app.use('/api/system', systemRoutes);
 
 // Health check
 app.get('/api/health', (_, res) => res.json({ status: 'ok' }));

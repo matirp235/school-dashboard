@@ -1,4 +1,4 @@
 fileignoreconfig:
-- filename: src/modules/expenses/ExpensesPage.jsx
-  checksum: 37d47c290cf4cf6c918e3530e9bd4e2e43a6856446441b8409e2c031e507f4ef
+- filename: src/components/Sidebar.jsx
+  checksum: e068cad872c1b986d6a85d91094b25bea63210273cd7a17ec442ce01f5126beb
 version: ""
