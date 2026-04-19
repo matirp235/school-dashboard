@@ -1,10 +1,10 @@
 // ─── src/App.jsx ──────────────────────────────────────────────────────────────
 import { Routes, Route, Navigate } from 'react-router-dom';
-import Sidebar from './components/Sidebar';
-import HomePage from './modules/home/HomePage';
-import StudentsPage from './modules/students/StudentsPage';
-import TeachersPage from './modules/teachers/TeachersPage';
-import ExpensesPage from './modules/expenses/ExpensesPage';
+import Sidebar from "./components/Sidebar.jsx";
+import HomePage from "./modules/home/HomePage.jsx";
+import StudentsPage from "./modules/students/StudentsPage.jsx";
+import TeachersPage from './modules/teachers/TeachersPage.jsx';
+import ExpensesPage from './modules/expenses/ExpensesPage.jsx';
 
 export default function App() {
   return (

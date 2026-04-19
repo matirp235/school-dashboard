@@ -1,8 +1,17 @@
-const router = require('express').Router();
-const multer = require('multer');
-const path = require('path');
-const db = require('../db');
+import express from 'express';
+import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url'; // Added for __dirname
+import db from '../db.js';
 
+// 1. Recreate __dirname for ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// 2. Initialize the router (This was missing)
+const router = express.Router();
+
+// 3. Configure Multer
 const storage = multer.diskStorage({
   destination: (_, __, cb) => cb(null, path.join(__dirname, '../uploads')),
   filename: (_, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
@@ -14,8 +23,14 @@ router.get('/', (req, res) => {
   const { q, class: cls } = req.query;
   let sql = 'SELECT * FROM students WHERE 1=1';
   const params = [];
-  if (q) { sql += ' AND (full_name LIKE ? OR roll_no LIKE ?)'; params.push(`%${q}%`, `%${q}%`); }
-  if (cls) { sql += ' AND class = ?'; params.push(cls); }
+  if (q) { 
+    sql += ' AND (full_name LIKE ? OR roll_no LIKE ?)'; 
+    params.push(`%${q}%`, `%${q}%`); 
+  }
+  if (cls) { 
+    sql += ' AND class = ?'; 
+    params.push(cls); 
+  }
   sql += ' ORDER BY full_name ASC';
   res.json(db.prepare(sql).all(...params));
 });
@@ -50,7 +65,9 @@ router.put('/:id', upload.single('photo'), (req, res) => {
   const d = req.body;
   const existing = db.prepare('SELECT photo_url FROM students WHERE id = ?').get(req.params.id);
   if (!existing) return res.status(404).json({ error: 'Student not found' });
+  
   const photo_url = req.file ? `/uploads/${req.file.filename}` : existing.photo_url;
+  
   db.prepare(`
     UPDATE students SET
       full_name=?, dob=?, gender=?, class=?, section=?, roll_no=?,
@@ -73,4 +90,4 @@ router.delete('/:id', (req, res) => {
   res.json({ success: true });
 });
 
-module.exports = router;
+export default router;
