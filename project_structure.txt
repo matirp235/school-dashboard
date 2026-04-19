@@ -1,0 +1,53 @@
+school-dashboard/
+├── package.json
+├── vite.config.js
+├── tailwind.config.js
+├── postcss.config.js
+├── .env
+│
+├── server/                        # Node.js + Express backend
+│   ├── index.js                   # Entry point — starts server
+│   ├── db.js                      # SQLite connection + table setup
+│   ├── routes/
+│   │   ├── students.js            # /api/students
+│   │   ├── teachers.js            # /api/teachers
+│   │   └── expenses.js            # /api/expenses
+│   └── uploads/                   # Photo storage (auto-created)
+│
+├── src/                           # React frontend
+│   ├── main.jsx                   # React entry point
+│   ├── App.jsx                    # Router + layout shell
+│   ├── index.css                  # Tailwind base styles
+│   │
+│   ├── components/                # Shared UI components
+│   │   ├── Sidebar.jsx
+│   │   ├── StatCard.jsx
+│   │   ├── Modal.jsx
+│   │   ├── Table.jsx
+│   │   └── SearchBar.jsx
+│   │
+│   ├── modules/                   # Plug-in / plug-out modules
+│   │   ├── home/
+│   │   │   └── HomePage.jsx
+│   │   ├── students/
+│   │   │   ├── StudentsPage.jsx
+│   │   │   ├── StudentForm.jsx
+│   │   │   └── StudentPrintView.jsx
+│   │   ├── teachers/
+│   │   │   ├── TeachersPage.jsx
+│   │   │   └── TeacherForm.jsx
+│   │   └── expenses/
+│   │       ├── ExpensesPage.jsx
+│   │       └── ExpenseForm.jsx
+│   │
+│   ├── services/                  # API call layer (swap DB here only)
+│   │   ├── studentService.js
+│   │   ├── teacherService.js
+│   │   └── expenseService.js
+│   │
+│   └── store/                     # Zustand global state
+│       ├── studentStore.js
+│       ├── teacherStore.js
+│       └── expenseStore.js
+│
+└── school.db                      # SQLite file (auto-created on first run)
