@@ -1,65 +1,45 @@
-import express from 'express';
+import { Router } from 'express';
 import db from '../db.js';
 
-const router = express.Router();
+const router = Router();
 
-// 1. GET all expenses (FIXED: Parse year as Number)
 router.get('/', (req, res) => {
-  const { month, year } = req.query;
-  let sql = 'SELECT * FROM expenses WHERE 1=1';
-  const params = [];
-  
-  if (month) { sql += ' AND month = ?'; params.push(month); }
-  // Cast year to Number so SQLite matches it correctly
-  if (year) { sql += ' AND year = ?'; params.push(Number(year)); }
-  
-  sql += ' ORDER BY id DESC';
-  res.json(db.prepare(sql).all(...params));
-});
-
-// 2. GET summary (FIXED: Parse year as Number)
-router.get('/summary', (req, res) => {
-  const { month, year } = req.query;
-  let sql = 'SELECT category, SUM(amount) as total FROM expenses WHERE 1=1';
-  const params = [];
-  
-  if (month) { sql += ' AND month = ?'; params.push(month); }
-  // Cast year to Number so SQLite matches it correctly
-  if (year) { sql += ' AND year = ?'; params.push(Number(year)); }
-  
-  sql += ' GROUP BY category';
-  
   try {
-    const rows = db.prepare(sql).all(...params);
-    const grand_total = rows.reduce((acc, curr) => acc + curr.total, 0);
-    res.json({ rows, grand_total });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to generate summary' });
-  }
+    const { month, year, category } = req.query;
+    let sql = 'SELECT * FROM expenses WHERE 1=1';
+    const params = [];
+    if (month && year) { sql += ` AND strftime('%m', expense_date) = ? AND strftime('%Y', expense_date) = ?`; params.push(String(month).padStart(2, '0'), String(year)); }
+    else if (year)     { sql += ` AND strftime('%Y', expense_date) = ?`; params.push(String(year)); }
+    if (category)      { sql += ' AND category = ?'; params.push(category); }
+    sql += ' ORDER BY expense_date DESC';
+    res.json(db.prepare(sql).all(...params));
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 3. POST new expense (Ensure year and amount are inserted as Numbers)
 router.post('/', (req, res) => {
-  const d = req.body;
-  const stmt = db.prepare('INSERT INTO expenses (month, year, category, description, amount) VALUES (?, ?, ?, ?, ?)');
-  const result = stmt.run(d.month, Number(d.year), d.category, d.description || '', Number(d.amount));
-  res.status(201).json({ id: result.lastInsertRowid, ...d });
+  try {
+    const { title, amount, category = 'Supplies', description, expense_date } = req.body;
+    if (!title || !amount) return res.status(400).json({ error: 'Title and amount are required' });
+    const result = db.prepare('INSERT INTO expenses (title, amount, category, description, expense_date) VALUES (?, ?, ?, ?, ?)').run(title, parseFloat(amount), category, description || null, expense_date || null);
+    res.status(201).json(db.prepare('SELECT * FROM expenses WHERE id = ?').get(result.lastInsertRowid));
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 4. PUT update expense
 router.put('/:id', (req, res) => {
-  const d = req.body;
-  const stmt = db.prepare('UPDATE expenses SET month=?, year=?, category=?, description=?, amount=? WHERE id=?');
-  const result = stmt.run(d.month, Number(d.year), d.category, d.description || '', Number(d.amount), req.params.id);
-  if (!result.changes) return res.status(404).json({ error: 'Expense not found' });
-  res.json({ id: Number(req.params.id), ...d });
+  try {
+    const existing = db.prepare('SELECT * FROM expenses WHERE id = ?').get(req.params.id);
+    if (!existing) return res.status(404).json({ error: 'Expense not found' });
+    const { title, amount, category, description, expense_date } = req.body;
+    db.prepare('UPDATE expenses SET title=?, amount=?, category=?, description=?, expense_date=? WHERE id=?').run(title || existing.title, parseFloat(amount) || existing.amount, category || existing.category, description ?? existing.description, expense_date || existing.expense_date, req.params.id);
+    res.json(db.prepare('SELECT * FROM expenses WHERE id = ?').get(req.params.id));
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 5. DELETE expense
 router.delete('/:id', (req, res) => {
-  const result = db.prepare('DELETE FROM expenses WHERE id = ?').run(req.params.id);
-  if (!result.changes) return res.status(404).json({ error: 'Expense not found' });
-  res.json({ success: true });
+  try {
+    db.prepare('DELETE FROM expenses WHERE id = ?').run(req.params.id);
+    res.json({ message: 'Expense deleted' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 export default router;

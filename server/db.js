@@ -1,103 +1,100 @@
 import Database from 'better-sqlite3';
-import path from 'path';
-import fs from 'fs';
+import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DB_PATH   = join(__dirname, '..', 'school.db');
 
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-const db = new Database(path.join(__dirname, '..', 'school.db'));
+const db = new Database(DB_PATH);
 
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS students (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    full_name   TEXT NOT NULL,
-    dob         TEXT NOT NULL,
-    gender      TEXT NOT NULL,
-    class       TEXT NOT NULL,
-    section     TEXT,
-    roll_no     TEXT,
-    address     TEXT,
-    guardian_name  TEXT NOT NULL,
-    guardian_rel   TEXT NOT NULL,
-    contact_primary TEXT NOT NULL,
-    contact_secondary TEXT,
-    security_deposit REAL DEFAULT 0,
-    photo_url   TEXT,
-    created_at  TEXT DEFAULT (datetime('now')),
-    updated_at  TEXT DEFAULT (datetime('now'))
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    name             TEXT    NOT NULL,
+    roll_number      TEXT    UNIQUE,
+    class            TEXT    NOT NULL,
+    board            TEXT    NOT NULL DEFAULT 'CBSE',
+    guardian_name    TEXT,
+    phone            TEXT,
+    address          TEXT,
+    date_of_birth    TEXT,
+    date_of_joining  TEXT,
+    security_deposit REAL    DEFAULT 0,
+    photo            TEXT,
+    created_at       TEXT    DEFAULT (datetime('now'))
   );
-
-  CREATE TABLE IF NOT EXISTS student_fees (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    student_id    INTEGER NOT NULL,
-    month_year    TEXT NOT NULL,
-    amount        REAL NOT NULL,
-    payment_mode  TEXT NOT NULL,
-    comment       TEXT,
-    created_at    TEXT DEFAULT (datetime('now')),
-    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
-  );
-
-  CREATE TABLE IF NOT EXISTS teachers (
-    id           INTEGER PRIMARY KEY AUTOINCREMENT,
-    full_name    TEXT NOT NULL,
-    dob          TEXT NOT NULL,
-    gender       TEXT NOT NULL,
-    employee_id  TEXT UNIQUE NOT NULL,
-    department   TEXT NOT NULL,
-    designation  TEXT NOT NULL,
-    subjects     TEXT,
-    qualification TEXT,
-    contact_primary  TEXT NOT NULL,
-    contact_secondary TEXT,
-    address      TEXT,
-    joining_date TEXT,
-    photo_url    TEXT,
-    created_at   TEXT DEFAULT (datetime('now')),
-    updated_at   TEXT DEFAULT (datetime('now'))
-  );
-
-  CREATE TABLE IF NOT EXISTS expenses (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    month       TEXT NOT NULL,
-    year        INTEGER NOT NULL,
-    category    TEXT NOT NULL,
-    description TEXT,
-    amount      REAL NOT NULL,
-    created_at  TEXT DEFAULT (datetime('now'))
-  );
-
-  CREATE INDEX IF NOT EXISTS idx_students_class ON students(class);
-  CREATE INDEX IF NOT EXISTS idx_students_name  ON students(full_name);
-  CREATE INDEX IF NOT EXISTS idx_teachers_dept  ON teachers(department);
-  CREATE INDEX IF NOT EXISTS idx_expenses_month ON expenses(year, month);
-  CREATE INDEX IF NOT EXISTS idx_fees_student ON student_fees(student_id);
 `);
 
-// Safe Migration for Students
-try {
-  const tableInfo = db.pragma("table_info(students)");
-  if (!tableInfo.some(col => col.name === 'security_deposit')) {
-    db.exec('ALTER TABLE students ADD COLUMN security_deposit REAL DEFAULT 0');
-  }
-} catch (error) { console.error("Student Migration failed:", error); }
+try { db.exec(`ALTER TABLE students ADD COLUMN board TEXT NOT NULL DEFAULT 'CBSE';`); } catch (_) {}
 
-// Safe Migration for Teachers Photo
-try {
-  const teacherTableInfo = db.pragma("table_info(teachers)");
-  if (!teacherTableInfo.some(col => col.name === 'photo_url')) {
-    db.exec('ALTER TABLE teachers ADD COLUMN photo_url TEXT');
-    console.log('Migration: Added photo_url to teachers table');
-  }
-} catch (error) { console.error("Teacher Migration failed:", error); }
+db.exec(`
+  CREATE TABLE IF NOT EXISTS fees (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id   INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    month        TEXT    NOT NULL,
+    amount       REAL    NOT NULL,
+    payment_mode TEXT    NOT NULL DEFAULT 'Cash',
+    note         TEXT,
+    paid_on      TEXT    DEFAULT (datetime('now'))
+  );
+`);
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS teachers (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    name            TEXT NOT NULL,
+    employee_id     TEXT UNIQUE,
+    department      TEXT,
+    designation     TEXT,
+    qualification   TEXT,
+    subjects        TEXT,
+    phone           TEXT,
+    email           TEXT,
+    date_of_joining TEXT,
+    photo           TEXT,
+    created_at      TEXT DEFAULT (datetime('now'))
+  );
+`);
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS expenses (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    title        TEXT NOT NULL,
+    amount       REAL NOT NULL,
+    category     TEXT NOT NULL DEFAULT 'Supplies',
+    description  TEXT,
+    expense_date TEXT DEFAULT (date('now')),
+    created_at   TEXT DEFAULT (datetime('now'))
+  );
+`);
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS progress_reports (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id  INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    exam_name   TEXT    NOT NULL,
+    subject     TEXT    NOT NULL,
+    marks       REAL    NOT NULL,
+    max_marks   REAL    NOT NULL DEFAULT 100,
+    exam_date   TEXT,
+    remarks     TEXT,
+    created_at  TEXT    DEFAULT (datetime('now'))
+  );
+`);
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS attendance (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    date       TEXT    NOT NULL,
+    status     TEXT    NOT NULL DEFAULT 'present',
+    note       TEXT,
+    created_at TEXT    DEFAULT (datetime('now')),
+    UNIQUE(student_id, date)
+  );
+`);
 
 export default db;

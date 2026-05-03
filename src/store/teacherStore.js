@@ -1,47 +1,59 @@
 import { create } from 'zustand';
+import { getTeachers, getTeacher, createTeacher, updateTeacher, deleteTeacher } from '../services/teacherService';
 
-export const useTeacherStore = create((set) => ({
+const useTeacherStore = create((set, get) => ({
   teachers: [],
+  selectedTeacher: null,
+  loading: false,
+  error: null,
+  filters: { search: '', department: '' },
 
-  fetchAll: async (q = '', department = '') => {
+  setFilters(partial) { set(s => ({ filters: { ...s.filters, ...partial } })); },
+
+  async fetchTeachers() {
+    set({ loading: true, error: null });
     try {
-      const query = new URLSearchParams();
-      if (q) query.append('q', q);
-      if (department) query.append('department', department);
-
-      const res = await fetch(`/api/teachers?${query.toString()}`);
-      if (!res.ok) throw new Error('Failed to fetch teachers');
-      const data = await res.json();
-      set({ teachers: data });
-    } catch (error) { console.error('Error fetching teachers:', error); }
+      const teachers = await getTeachers(get().filters);
+      set({ teachers, loading: false });
+    } catch (err) { set({ error: err.message, loading: false }); }
   },
 
-  add: async (formData) => {
-    // Note: Do not set Content-Type header when sending FormData
-    const res = await fetch('/api/teachers', { method: 'POST', body: formData });
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.error || 'Failed to add teacher');
-    }
-    const newTeacher = await res.json();
-    set((state) => ({ teachers: [...state.teachers, newTeacher] }));
+  async fetchTeacher(id) {
+    set({ loading: true });
+    try {
+      const t = await getTeacher(id);
+      set({ selectedTeacher: t, loading: false });
+    } catch (err) { set({ error: err.message, loading: false }); }
   },
 
-  update: async (id, formData) => {
-    const res = await fetch(`/api/teachers/${id}`, { method: 'PUT', body: formData });
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.error || 'Failed to update teacher');
-    }
-    const updatedTeacher = await res.json();
-    set((state) => ({
-      teachers: state.teachers.map((t) => (t.id === id ? updatedTeacher : t)),
-    }));
+  async addTeacher(fd) {
+    set({ loading: true });
+    try {
+      const t = await createTeacher(fd);
+      set(s => ({ teachers: [t, ...s.teachers], loading: false }));
+      return t;
+    } catch (err) { set({ error: err.message, loading: false }); throw err; }
   },
 
-  deleteTeacher: async (id) => {
-    const res = await fetch(`/api/teachers/${id}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error('Failed to delete teacher');
-    set((state) => ({ teachers: state.teachers.filter((t) => t.id !== id) }));
-  }
+  async editTeacher(id, fd) {
+    set({ loading: true });
+    try {
+      const t = await updateTeacher(id, fd);
+      set(s => ({ teachers: s.teachers.map(x => x.id === t.id ? t : x), loading: false }));
+      return t;
+    } catch (err) { set({ error: err.message, loading: false }); throw err; }
+  },
+
+  async removeTeacher(id) {
+    try {
+      await deleteTeacher(id);
+      set(s => ({ teachers: s.teachers.filter(t => t.id !== id) }));
+    } catch (err) { set({ error: err.message }); throw err; }
+  },
+
+  clearError() { set({ error: null }); },
 }));
+
+export default useTeacherStore;
+
+export { useTeacherStore };
