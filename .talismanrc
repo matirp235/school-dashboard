@@ -1,4 +1,16 @@
 fileignoreconfig:
-- filename: src/components/Sidebar.jsx
-  checksum: e068cad872c1b986d6a85d91094b25bea63210273cd7a17ec442ce01f5126beb
+- filename: src/components/Modal.jsx
+  checksum: 09aba80a83539e126e230cc1429b9b7de9cb9177931c8ec8f7f845b78dd4769b
+- filename: src/modules/teachers/TeachersPage.jsx
+  checksum: 299c5548593e4ead25925d5d5dc22468d46fc686bbdaf60e841036885cd5bfbb
+- filename: src/modules/attendance/AttendancePage.jsx
+  checksum: 6af069692688c0883cea93680efc7f08805c65bc410b3f4df088c095c4af2550
+- filename: src/modules/students/StudentForm.jsx
+  checksum: 782227c322812105bbf33d05d7ec1527859e086a4ec82e0b2f16cc890dd2c29d
+- filename: src/modules/students/StudentPrintView.jsx
+  checksum: 6fcb7efdf21d446513690f1e4cceac7f64cc0fed22c7877c70207b85078f7598
+- filename: src/modules/students/StudentsPage.jsx
+  checksum: 5a3095d4d8c888df529f6c3e08ecab203350cd522a47ab90fb94314f2c8f7103
+- filename: src/modules/students/ProgressReport.jsx
+  checksum: 3ea3b702e090ab1e6022dea29f2b31cb6333e80c4e1785364cdd6f17dd655018
 version: ""
