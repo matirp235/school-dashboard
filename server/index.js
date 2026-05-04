@@ -8,6 +8,8 @@ import teachersRouter   from './routes/teachers.js';
 import expensesRouter   from './routes/expenses.js';
 import progressRouter   from './routes/progress.js';
 import attendanceRouter from './routes/attendance.js';
+import authRouter       from './routes/auth.js';
+import categoriesRouter from './routes/categories.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app  = express();
@@ -19,7 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use((_req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,x-auth-token');
   if (_req.method === 'OPTIONS') return res.sendStatus(200);
   next();
 });
@@ -28,6 +30,8 @@ const uploadsDir = join(__dirname, 'uploads');
 if (!existsSync(uploadsDir)) mkdirSync(uploadsDir, { recursive: true });
 app.use('/uploads', express.static(uploadsDir));
 
+app.use('/api/auth',       authRouter);
+app.use('/api/categories', categoriesRouter);
 app.use('/api/students',   studentsRouter);
 app.use('/api/teachers',   teachersRouter);
 app.use('/api/expenses',   expensesRouter);
