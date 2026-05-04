@@ -1,16 +1,18 @@
 fileignoreconfig:
-- filename: src/components/Modal.jsx
-  checksum: 09aba80a83539e126e230cc1429b9b7de9cb9177931c8ec8f7f845b78dd4769b
-- filename: src/modules/teachers/TeachersPage.jsx
-  checksum: 299c5548593e4ead25925d5d5dc22468d46fc686bbdaf60e841036885cd5bfbb
-- filename: src/modules/attendance/AttendancePage.jsx
-  checksum: 6af069692688c0883cea93680efc7f08805c65bc410b3f4df088c095c4af2550
-- filename: src/modules/students/StudentForm.jsx
-  checksum: 782227c322812105bbf33d05d7ec1527859e086a4ec82e0b2f16cc890dd2c29d
-- filename: src/modules/students/StudentPrintView.jsx
-  checksum: 6fcb7efdf21d446513690f1e4cceac7f64cc0fed22c7877c70207b85078f7598
-- filename: src/modules/students/StudentsPage.jsx
-  checksum: 5a3095d4d8c888df529f6c3e08ecab203350cd522a47ab90fb94314f2c8f7103
-- filename: src/modules/students/ProgressReport.jsx
-  checksum: 3ea3b702e090ab1e6022dea29f2b31cb6333e80c4e1785364cdd6f17dd655018
+- filename: package-lock.json
+  checksum: 1abc7989a263f7f341cf269f2f02511daad1e0c75bb0e07b1dfa348df64b38d6
+- filename: server/routes/auth.js
+  checksum: 27a19b6722168054f903e6cd10343051b7eb9343a0305501c508c18c3fe23902
+- filename: server/db.js
+  checksum: 73808d8ffd9fb69c1d41b343b65195521ca43b05052ec366cf15ca5133c42728
+- filename: src/services/authService.js
+  checksum: 0f4bd43a1087481da1ef66caa969d7da79b2f1b056e66274c01baab6c71e8c10
+- filename: src/store/authStore.js
+  checksum: bd1454a26974fe75950067bef98915224af01753c8e2c1cc2d492dc1b29c2d4d
+- filename: src/modules/auth/LoginPage.jsx
+  checksum: 95e98c2eb7750ef400dd176a15cf11626a59ef8ee3b5b2dbfb1c988bfd50039a
+- filename: src/components/Sidebar.jsx
+  checksum: c0fdad26634b240012b5f5b08fd86e82b6dce12341aa9876295ba4c2236cf831
+- filename: src/modules/expenses/ExpensesPage.jsx
+  checksum: 1c0d9cecdc2f0661af3fbd8f286bb62def80b0123e8d1f522dba11e0c7918c0f
 version: ""
